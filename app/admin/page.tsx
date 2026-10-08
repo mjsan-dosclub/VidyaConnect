@@ -61,14 +61,11 @@ export default function Admin() {
     let active = true;
     try {
       const supa = browserDB();
-      void supa.auth.getUser().then(({ data }) => {
+      const { data } = supa.auth.onAuthStateChange((_e, session) => {
         if (active) {
-          setAuthorized(data.user?.app_metadata.role === 'admin');
+          setAuthorized(session?.user.app_metadata.role === 'admin');
           setReady(true);
         }
-      });
-      const { data } = supa.auth.onAuthStateChange((_e, session) => {
-        if (active) setAuthorized(session?.user.app_metadata.role === 'admin');
       });
       return () => {
         active = false;
