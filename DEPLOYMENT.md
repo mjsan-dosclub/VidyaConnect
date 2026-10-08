@@ -17,7 +17,7 @@ The source is prepared for Vercel. A live deployment still requires your service
 | NEXT_PUBLIC_SUPABASE_ANON_KEY | Your Supabase anonymous/publishable client key                                        | Yes              |
 | SUPABASE_SERVICE_ROLE_KEY     | Supabase service role key                                                             | No               |
 | GEMINI_API_KEY                | Your Google AI Studio Gemini API key                                                  | No               |
-| GEMINI_MODEL                  | gemini-2.5-flash, or a supported structured-output model available to your account    | No               |
+| GEMINI_MODEL                  | gemini-3.5-flash-lite, or a supported structured-output model available to your account    | No               |
 | RESEND_API_KEY                | Your Resend API key                                                                   | No               |
 | EMAIL_FROM                    | VidyaConnect &lt;hello@your-verified-domain.com&gt; using a domain verified in Resend | No               |
 | CRON_SECRET                   | An independent random secret, at least 32 characters                                  | No               |
