@@ -1121,3 +1121,12 @@ footer {
   overflow-wrap: anywhere;
   color: #65704e;
 }
+
+.mic-button[aria-pressed="true"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.mic-control-label { font-size: 12px; font-weight: 700; line-height: 1; }

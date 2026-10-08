@@ -14,21 +14,7 @@ import {
 } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { getSession, saveSession, post } from '@/lib/client';
-type Recognition = {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult:
-    | ((e: {
-        results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
-      }) => void)
-    | null;
-  onerror: ((e: { error: string }) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-};
+import { SpeechSession, type Recognition } from '@/lib/speech-session';
 export function ModeToggle({ manual = false }: { manual?: boolean }) {
   return (
     <nav className="mode-toggle glass" aria-label="Capture mode">
@@ -58,14 +44,17 @@ export default function Voice() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [phase, setPhase] = useState('');
-  const rec = useRef<Recognition | null>(null);
+  const rec = useRef<SpeechSession | null>(null);
+  const textRef = useRef('');
   const reduced = useReducedMotion();
   useEffect(() => {
     const p = getSession();
-    setText(p.transcript ?? '');
-    return () => rec.current?.abort();
+    textRef.current = p.transcript ?? '';
+    setText(textRef.current);
+    return () => rec.current?.dispose();
   }, []);
   function change(v: string) {
+    textRef.current = v;
     setText(v);
     const p = getSession();
     saveSession({ ...p, transcript: v });
@@ -88,34 +77,18 @@ export default function Voice() {
       document.getElementById('transcript')?.focus();
       return;
     }
-    const recognition = new API();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-IN';
-    const base = text.trim();
-    recognition.onresult = (e) => {
-      const spoken = Array.from(e.results)
-        .map((r) => r[0].transcript)
-        .join(' ');
-      change([base, spoken].filter(Boolean).join(' ').slice(0, 8000));
-    };
-    recognition.onerror = (e) => {
-      setRecording(false);
-      setError(
-        e.error === 'not-allowed'
-          ? 'Microphone permission was denied. Enable it in browser settings or type below.'
-          : 'Recording stopped. Your transcript is still here; you can edit or try again.',
-      );
-    };
-    recognition.onend = () => setRecording(false);
-    rec.current = recognition;
-    try {
-      recognition.start();
-      setRecording(true);
-    } catch {
-      setError('Could not start the microphone. Please type below.');
-    }
+    const session = new SpeechSession({
+      create: () => new API(),
+      android: /Android/i.test(navigator.userAgent),
+      onText: change,
+      onListening: setRecording,
+      onError: setError,
+    });
+    rec.current?.dispose();
+    rec.current = session;
+    session.start(textRef.current);
   }
+
   async function processVoice() {
     setBusy(true);
     setError('');
@@ -202,7 +175,10 @@ export default function Voice() {
             aria-pressed={recording}
           >
             {recording ? (
-              <Square size={30} fill="currentColor" />
+              <>
+                <Square size={26} fill="currentColor" aria-hidden="true" />
+                <span className="mic-control-label">Stop</span>
+              </>
             ) : (
               <Mic size={34} />
             )}
