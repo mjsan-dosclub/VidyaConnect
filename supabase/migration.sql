@@ -1,4 +1,6 @@
 -- Apply once in the Supabase SQL editor. Secrets never belong in SQL.
+-- This transaction prevents a partial migration if any statement fails.
+begin;
 create table public.leads (
  id uuid primary key default gen_random_uuid(), created_at timestamptz not null default now(),
  mode text not null check(mode in ('voice','manual')), status text not null default 'draft' check(status in ('draft','submitted','confirmed')),
@@ -41,3 +43,5 @@ revoke execute on function public.finalize_lead(uuid,jsonb,text),public.consume_
 grant execute on function public.finalize_lead(uuid,jsonb,text),public.consume_rate_limit(text),public.mark_email_sent(uuid) to service_role;
 
 grant all on public.leads,public.email_outbox,public.rate_limits to service_role;
+
+commit;

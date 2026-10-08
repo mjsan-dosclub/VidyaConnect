@@ -6,7 +6,7 @@ The source is prepared for Vercel. A live deployment still requires your service
 
 1. Import https://github.com/mjsan-dosclub/VidyaConnect into Vercel. The app is at the repository root: leave Root Directory at its default (`.`).
 2. Select **Next.js** and **Node.js 24.x**. `vercel.json` specifies `npm ci` and `npm run check:production && npm run build`. Keep the standard Next.js output directory; do not use a static export.
-3. Create a Supabase project. Run `supabase/migration.sql` once in its SQL editor. Create your manager in Supabase Auth and set their trusted `app_metadata.role` to `admin`. The DB field `school_name` is retained for compatibility; all visitor labels and the exported CSV header use institution/organisation terminology.
+3. Create a Supabase project. Run `supabase/migration.sql` once in its SQL editor, then run `supabase/verify.sql` to check permissions, realtime publication, finalization, email queueing and rate limits. Verification rolls back its temporary fixtures. Create your manager in Supabase Auth and set their trusted `app_metadata.role` to `admin`. The DB field `school_name` is retained for compatibility; all visitor labels and the exported CSV header use institution/organisation terminology.
 4. In Vercel → Project Settings → Environment Variables, add the following for Production and for any Preview environment where you want functional capture. Vercel variables are used in subsequent deployments; redeploy after changing them.
 
 | Variable                      | Set to                                                                                | Browser-visible? |
