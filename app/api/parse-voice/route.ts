@@ -26,6 +26,8 @@ export const POST = handle(async (req) => {
       'AI service is not configured. Your draft is saved. Please contact the booth team.',
     );
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  let stage = 'provider';
+  try {
   const result = await ai.models.generateContent({
     model: process.env.GEMINI_MODEL ?? 'gemini-3.5-flash-lite',
     contents: JSON.stringify({ transcript: lead.raw_transcript }),
@@ -37,7 +39,25 @@ export const POST = handle(async (req) => {
       responseJsonSchema: z.toJSONSchema(extraction),
     },
   });
+  stage = 'structured-output';
   const parsed = extraction.parse(JSON.parse(result.text ?? '{}'));
+  stage = 'database';
   await saveExtraction(p.id, p.token, parsed);
   return { ...parsed, local_mode: localMode() };
+  } catch (error) {
+    const failure = error as { status?: unknown; code?: unknown; message?: unknown };
+    const message = typeof failure.message === 'string' ? failure.message.toLowerCase() : '';
+    const reason = message.includes('location') ? 'provider-location'
+      : message.includes('quota') || message.includes('resource_exhausted') ? 'provider-quota'
+      : message.includes('api key') || message.includes('permission_denied') ? 'provider-auth'
+      : message.includes('not found') || message.includes('not_found') ? 'provider-model'
+      : message.includes('timeout') || message.includes('abort') ? 'provider-timeout'
+      : 'unclassified';
+    console.error('VidyaConnect extraction failed', {
+      stage, reason,
+      status: typeof failure.status === 'number' ? failure.status : undefined,
+      databaseCode: typeof failure.code === 'string' && /^\d{5}$/.test(failure.code) ? failure.code : undefined,
+    });
+    throw error;
+  }
 });
