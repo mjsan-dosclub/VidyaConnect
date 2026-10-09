@@ -1,4 +1,5 @@
 'use client';
+import MicrophoneIntro from './microphone-intro';
 import { LanguageSelector, useLanguage } from './language';
 import { APP_NAME } from '@/lib/brand';
 import { useEffect, useState } from 'react';
@@ -83,10 +84,11 @@ export default function MobileShell({
             <Link href="/admin">{t('Desk')}</Link>
           </header>
           <LanguageSelector />
+          {path === '/' && !wide && <MicrophoneIntro />}
           {children}
           <footer>
             <ShieldCheck size={14} />
-            {t('Your details. A more personal follow-up.')}
+            {t('Your feedback. A better originBI.')}
             <Link href="/admin" aria-label={t('Booth manager portal')}>
               <ArrowUpRight size={15} />
             </Link>

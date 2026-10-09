@@ -9,10 +9,9 @@ export type LeadSession = {
   phone?: string;
   school_name?: string | null;
   requirements_summary?: string[];
-  detected_objective?: 'Demo' | 'Know More' | 'Catch-up Call';
 };
 export function getSession(mode: 'voice' | 'manual' = 'voice'): LeadSession {
-  const saved = sessionStorage.getItem('karya-lead-' + mode);
+  const saved = sessionStorage.getItem('originbi-survey-v1-' + mode);
   if (saved) return JSON.parse(saved);
   const token = Array.from(crypto.getRandomValues(new Uint8Array(32)), (n) =>
     n.toString(16).padStart(2, '0'),
@@ -25,7 +24,7 @@ export function saveSession(
   p: LeadSession,
   mode: 'voice' | 'manual' = 'voice',
 ) {
-  sessionStorage.setItem('karya-lead-' + mode, JSON.stringify(p));
+  sessionStorage.setItem('originbi-survey-v1-' + mode, JSON.stringify(p));
 }
 export async function post(path: string, data: unknown) {
   const res = await fetch(path, {

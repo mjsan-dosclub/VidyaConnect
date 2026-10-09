@@ -29,20 +29,18 @@ test('AI may omit unknown phone but cannot invent malformed schema', () => {
     phone: '',
     school_name: null,
     requirements_summary: [],
-    detected_objective: 'Know More',
   };
   assert.equal(extraction.safeParse(base).success, true);
   assert.equal(extraction.safeParse({ ...base, phone: '1234' }).success, false);
-  assert.equal(
-    extraction.safeParse({ ...base, detected_objective: 'Other' }).success,
-    false,
-  );
+
 });
-test('manual submission requires consent, email, and callback', () => {
-  assert.equal(
-    manual.safeParse({ name: 'Test', phone: '9876543210' }).success,
-    false,
-  );
+test('survey accepts optional email and strips legacy appointment fields; feedback and consent are required', () => {
+  const base = { id: '00000000-0000-4000-8000-000000000001', token: 'a'.repeat(64), name: 'Test', phone: '9876543210', school_name: 'Test College', bullet_requirements: ['Feature request: Add reports'], consent: true, objective: 'Demo', callback_slot: 'Morning' };
+  const result = manual.parse(base);
+  assert.equal('objective' in result, false);
+  assert.equal('callback_slot' in result, false);
+  assert.equal(manual.safeParse({...base, consent: false}).success, false);
+  assert.equal(manual.safeParse({...base, bullet_requirements: []}).success, false);
 });
 test('CSV escapes quotes and neutralizes spreadsheet formulas', () => {
   assert.equal(csvCell('=HYPERLINK("evil")'), '"\'=HYPERLINK(""evil"")"');

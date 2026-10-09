@@ -38,7 +38,6 @@ export async function saveExtraction(
     phone: string;
     school_name: string | null;
     requirements_summary: string[];
-    detected_objective: string;
   },
 ) {
   const patch = {
@@ -46,7 +45,9 @@ export async function saveExtraction(
     phone: parsed.phone,
     school_name: parsed.school_name,
     bullet_requirements: parsed.requirements_summary,
-    objective: parsed.detected_objective,
+    objective: null,
+    callback_date: null,
+    callback_slot: null,
   };
   if (localMode()) {
     localUpdate(id, hash(token), patch);
@@ -68,9 +69,6 @@ export async function finalize(
     school_name: string;
     email?: string;
     bullet_requirements: string[];
-    objective: string;
-    callback_date?: string;
-    callback_slot?: string;
   },
   status: 'confirmed' | 'submitted',
 ) {

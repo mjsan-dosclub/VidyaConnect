@@ -1,6 +1,6 @@
 'use client';
 import { useLanguage } from '@/components/language';
-import { APP_NAME } from '@/lib/brand';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -42,7 +42,7 @@ export default function Confirmation() {
         consent: f.get('consent') === 'on',
       });
       sessionStorage.setItem(
-        'karya-success',
+        'originbi-survey-success-v1',
         JSON.stringify({
           name: p.name,
           email: p.email,
@@ -61,7 +61,7 @@ export default function Confirmation() {
   return (
     <>
       <section className="intro">
-        <span className="eyebrow">{t('A LITTLE CHECK BEFORE WE CONNECT')}</span>
+        <span className="eyebrow">{t('REVIEW YOUR FEEDBACK')}</span>
         <h1>
           {t('Thank you,')} <em>{lead.name || 'there'}.</em>
         </h1>
@@ -93,7 +93,7 @@ export default function Confirmation() {
         </span>
         <i />
         <span className="step">
-          3 <small>{t('Connect')}</small>
+          3 <small>{t('Send')}</small>
         </span>
       </div>
       <form className="form-stack" onSubmit={submit}>
@@ -147,7 +147,7 @@ export default function Confirmation() {
           </label>
         </div>
         <div className="glass form-card">
-          <h2>{t('Your requirements')}</h2>
+          <h2>{t('Your feedback on originBI')}</h2>
           <ul className="requirements">
             {lead.requirements_summary?.length ? (
               lead.requirements_summary.map((r, i) => (
@@ -157,11 +157,11 @@ export default function Confirmation() {
                 </li>
               ))
             ) : (
-              <li>{t('Add the requirements from your introduction below.')}</li>
+              <li>{t('Add your suggestions or current problems below.')}</li>
             )}
           </ul>
           <label>
-            {t('Edit your requirements')}{' '}
+            {t('Edit your feedback')}{' '}
             <small className="muted">{t('· one per line')}</small>
             <textarea
               name="requirements"
@@ -170,20 +170,11 @@ export default function Confirmation() {
               maxLength={3200}
             />
           </label>
-          <label>
-            {t('Your next step')}
-            <select name="objective" defaultValue={lead.detected_objective}>
-              <option value="Demo">{t('Demo')}</option>
-              <option value="Know More">{t('Know More')}</option>
-              <option value="Catch-up Call">{t('Catch-up Call')}</option>
-            </select>
-          </label>
         </div>
         <label className="consent">
           <input name="consent" type="checkbox" required />
           <span>
-            {t('I agree to be contacted by the')} {APP_NAME}{' '}
-            {t('team about my institution’s requirements.')}
+            {t('I agree to have my details and feedback saved by originBI to improve the product.')}
           </span>
         </label>
         {error && (
@@ -201,7 +192,7 @@ export default function Confirmation() {
           <ArrowRight size={18} />
         </button>
         <Link href="/" className="center muted">
-          {t('Back to my introduction')}
+          {t('Back to my feedback')}
         </Link>
       </form>
     </>

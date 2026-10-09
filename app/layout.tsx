@@ -4,7 +4,7 @@ import './globals.css';
 import { LanguageProvider } from '@/components/language';
 import MobileShell from '@/components/mobile-shell';
 export const metadata: Metadata = {
-  title: `${APP_NAME} | Conversations that move education forward`,
+  title: `${APP_NAME} | Visitor feedback that improves originBI`,
   description: `Skip the queue. Share your institution’s next big idea with ${APP_NAME}.`,
 };
 export const viewport: Viewport = {

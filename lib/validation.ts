@@ -2,8 +2,6 @@ import { z } from 'zod';
 export const phone = z
   .string()
   .regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit Indian mobile number');
-export const objective = z.enum(['Demo', 'Know More', 'Catch-up Call']);
-export const slot = z.enum(['Morning', 'Afternoon', 'Evening']);
 export const identity = z.object({
   id: z.uuid(),
   token: z.string().regex(/^[a-f0-9]{64}$/),
@@ -13,29 +11,17 @@ export const extraction = z.object({
   phone: z.string().regex(/^(?:[6-9]\d{9})?$/),
   school_name: z.string().max(200).nullable(),
   requirements_summary: z.array(z.string().max(400)).max(8),
-  detected_objective: objective,
 });
 export const details = z.object({
   name: z.string().trim().min(2).max(120),
   phone,
   email: z.union([z.email(), z.literal('')]).optional(),
   school_name: z.string().trim().max(200),
-  bullet_requirements: z.array(z.string().max(400)).max(8),
-  objective,
+  bullet_requirements: z.array(z.string().trim().min(1).max(400)).min(1, "Please share at least one suggestion or problem").max(8),
 });
 export const manual = identity.extend({
   ...details.shape,
   school_name: z.string().trim().min(2).max(200),
-  email: z.email(),
-  callback_date: z.iso
-    .date()
-    .refine(
-      (v) =>
-        v >=
-        new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }),
-      'Choose today or a future date',
-    ),
-  callback_slot: slot,
   consent: z.literal(true),
 });
 export function normalizeSpokenPhone(input: string) {

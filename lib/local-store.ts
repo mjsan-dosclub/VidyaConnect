@@ -32,10 +32,10 @@ type LocalLead = {
   phone?: string;
   school_name?: string | null;
   bullet_requirements?: string[];
-  objective?: string;
+  objective?: string | null;
   email?: string;
-  callback_date?: string;
-  callback_slot?: string;
+  callback_date?: string | null;
+  callback_slot?: string | null;
   email_sent: boolean;
 };
 export function localOwned(id: string, ownerHash: string): LocalLead {

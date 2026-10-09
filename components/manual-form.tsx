@@ -1,9 +1,9 @@
 'use client';
 import { useLanguage } from '@/components/language';
-import { APP_NAME } from '@/lib/brand';
+import { feedbackCategories, feedbackQuestions } from '@/lib/feedback';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, LoaderCircle, CalendarDays } from 'lucide-react';
+import { ArrowRight, LoaderCircle } from 'lucide-react';
 import { ModeToggle } from './voice';
 import { getSession, post } from '@/lib/client';
 import { manual } from '@/lib/validation';
@@ -22,11 +22,11 @@ export default function ManualForm() {
         ...getSession('manual'),
         ...Object.fromEntries(f),
         consent: f.get('consent') === 'on',
-        bullet_requirements: f.get('notes') ? [String(f.get('notes'))] : [],
+        bullet_requirements: feedbackCategories.flatMap((category, i) => { const value = String(f.get('feedback_' + i) ?? '').trim(); return value ? [category + ': ' + value] : []; }),
       });
       const result = await post('/api/manual', p);
       sessionStorage.setItem(
-        'karya-success',
+        'originbi-survey-success-v1',
         JSON.stringify({
           name: p.name,
           email: p.email,
@@ -45,13 +45,13 @@ export default function ManualForm() {
   return (
     <>
       <p className="capture-tagline">
-        {t('A minute with the booth. Speak it, or write it.')}
+        {t('Help shape originBI. Speak it, or write it.')}
       </p>
       <ModeToggle manual />
       <form onSubmit={submit} className="form-stack">
         <div className="glass form-card">
           <h2>{t('A little about you')}</h2>
-          <p className="muted">{t('So we know who to say hello to.')}</p>
+          <p className="muted">{t('Tell us who is sharing this feedback.')}</p>
           <label>
             {t('Full name')}
             <input
@@ -91,76 +91,25 @@ export default function ManualForm() {
             </div>
           </label>
           <label>
-            {t('Email address')}
+            {t('Email')} <small>{t('· optional, for your thank-you email')}</small>
             <input
               name="email"
               autoComplete="email"
               type="email"
               placeholder={t('you@organisation.edu')}
-              required
               maxLength={254}
             />
           </label>
         </div>
         <div className="glass form-card">
-          <h2>
-            <CalendarDays size={19} />
-            {t('Let’s find a good time')}
-          </h2>
-          <label>
-            {t('Preferred callback date')}
-            <input
-              type="date"
-              name="callback_date"
-              required
-              min={new Date().toLocaleDateString('en-CA', {
-                timeZone: 'Asia/Kolkata',
-              })}
-            />
-          </label>
-          <fieldset>
-            <legend>{t('Preferred time slot')}</legend>
-            {[
-              ['Morning', '9:00 AM – 11:00 AM'],
-              ['Afternoon', '1:00 PM – 3:00 PM'],
-              ['Evening', '3:00 PM – 7:00 PM'],
-            ].map(([s, time]) => (
-              <label className="slot" key={s}>
-                <input type="radio" name="callback_slot" value={s} required />
-                <span>
-                  {t(s)}
-                  <small>{time} · IST</small>
-                </span>
-              </label>
-            ))}
-          </fieldset>
-        </div>
-        <div className="glass form-card">
-          <label>
-            {t('I’d like to')}
-            <select name="objective" defaultValue="Know More">
-              <option value="Demo">{t('Demo')}</option>
-              <option value="Know More">{t('Know More')}</option>
-              <option value="Catch-up Call">{t('Catch-up Call')}</option>
-            </select>
-          </label>
-          <label>
-            {t('What’s on your mind?')}
-            <textarea
-              name="notes"
-              rows={3}
-              maxLength={400}
-              placeholder={t(
-                'Tell us a little about your goals or challenges.',
-              )}
-            />
-          </label>
+          <h2>{t('Your feedback on originBI')}</h2>
+          <p className="muted">{t('Answer any of these. At least one response is needed.')}</p>
+          {feedbackCategories.map((category, i) => <label key={category}>{t(category)}<textarea name={'feedback_' + i} rows={3} maxLength={360} placeholder={t(feedbackQuestions[i])} /></label>)}
         </div>
         <label className="consent">
           <input type="checkbox" name="consent" required />
           <span>
-            {t('I agree to be contacted by the')} {APP_NAME}{' '}
-            {t('team about my institution’s requirements.')}
+            {t('I agree to have my details and feedback saved by originBI to improve the product.')}
           </span>
         </label>
         {error && (
@@ -170,11 +119,11 @@ export default function ManualForm() {
         )}
         <button disabled={busy} className="primary">
           {busy ? <LoaderCircle className="spin" size={18} /> : null}
-          {t(busy ? 'Saving your details…' : 'Let’s connect')}
+          {t(busy ? 'Saving your details…' : 'Submit feedback')}
           <ArrowRight size={18} />
         </button>
         <p className="center muted">
-          {t('No queue. No pressure. Just possibilities.')}
+          {t('Your ideas help improve originBI.')}
         </p>
       </form>
     </>

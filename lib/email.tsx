@@ -29,7 +29,7 @@ export async function sendPending(id?: string) {
         {
           from: process.env.EMAIL_FROM.replace(/^[^<]+(?=<)/, `${APP_NAME} `),
           to: lead.email,
-          subject: `Thank you for connecting with ${APP_NAME}`,
+          subject: `Thank you for your feedback on ${APP_NAME}`,
           react: (
             <ThankYou
               name={lead.name}

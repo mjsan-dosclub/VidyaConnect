@@ -15,7 +15,7 @@ export default function Thanks() {
   } | null>(null);
   const router = useRouter();
   useEffect(() => {
-    const raw = sessionStorage.getItem('karya-success');
+    const raw = sessionStorage.getItem('originbi-survey-success-v1');
     if (!raw) {
       router.replace('/');
       return;
@@ -27,20 +27,20 @@ export default function Thanks() {
       <div className="success-orb">
         <Check size={48} />
       </div>
-      <span className="eyebrow">{t('YOU’RE ON OUR LIST')}</span>
+      <span className="eyebrow">{t('FEEDBACK RECEIVED')}</span>
       <h1>
-        {t('A great conversation.')}
+        {t('Thank you for your ideas.')}
         <br />
-        <em>{t('An even better beginning.')}</em>
+        <em>{t('Help us build better.')}</em>
       </h1>
       <p>
         {t('Thank you')}
         {result ? `, ${result.name}` : ''}
-        {t('. Your details are saved')}
+        {t('. Your feedback is saved')}
         {result?.localMode ? ' on this computer' : ''}.<br />
         {result?.localMode
           ? 'This is a local preview submission.'
-          : t('Our team looks forward to connecting with you.')}
+          : t('Your ideas help improve originBI.')}
       </p>
       <div className="glass next-card">
         <Sparkles size={24} />
@@ -49,7 +49,7 @@ export default function Thanks() {
           {result?.localMode
             ? 'Your introduction is stored locally. Connect the production services to enable team follow-up and email.'
             : t(
-                'We’ll review your requirements and reach out to explore what’s possible for your institution.',
+                'Our team will review your suggestions, challenges and expected solutions to help improve originBI.',
               )}
         </p>
         {result?.email && (
@@ -66,12 +66,12 @@ export default function Thanks() {
         className="primary"
         href="/"
         onClick={() => {
-          sessionStorage.removeItem('karya-lead-voice');
-          sessionStorage.removeItem('karya-lead-manual');
-          sessionStorage.removeItem('karya-success');
+          sessionStorage.removeItem('originbi-survey-v1-voice');
+          sessionStorage.removeItem('originbi-survey-v1-manual');
+          sessionStorage.removeItem('originbi-survey-success-v1');
         }}
       >
-        {t('Start a new introduction')}
+        {t('Share new feedback')}
         <ArrowUpRight size={18} />
       </Link>
       <p className="muted">{t('Enjoy the rest of the summit.')}</p>

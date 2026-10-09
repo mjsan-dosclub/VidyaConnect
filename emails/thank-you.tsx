@@ -19,7 +19,7 @@ export default function ThankYou({
   return (
     <Html>
       <Head />
-      <Preview>Thank you for connecting with {APP_NAME}</Preview>
+      <Preview>Thank you for your feedback on {APP_NAME}</Preview>
       <Body
         style={{ backgroundColor: '#f6f4ff', fontFamily: 'Arial,sans-serif' }}
       >
@@ -32,12 +32,11 @@ export default function ThankYou({
           }}
         >
           <Text style={{ color: '#150089' }}>
-            {APP_NAME} · Conversations that move education forward
+            {APP_NAME} · Visitor feedback that shapes better products
           </Text>
           <Heading>Thank you, {name}.</Heading>
           <Text>
-            It was a pleasure connecting at the summit. We have received your
-            details and our team will follow up.
+            Thank you for sharing your experience and ideas about originBI. Your feedback is saved and will help our team improve the product.
           </Text>
           {requirements.map((r, i) => (
             <Text key={i}>• {r}</Text>

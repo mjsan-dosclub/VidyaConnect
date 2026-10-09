@@ -246,7 +246,7 @@ export default function Voice() {
     try {
       const p = getSession();
       saveSession({ ...p, transcript: text, language });
-      setPhase(t('Saving your introduction…'));
+      setPhase(t('Saving your feedback…'));
       await post('/api/draft', { ...p, transcript: text, language });
       setPhase(t('Preparing your review…'));
       const result = await post('/api/parse-voice', { ...p, language });
@@ -260,9 +260,9 @@ export default function Voice() {
     }
   }
   return (
-    <>
+    <div className="voice-survey">
       <p className="capture-tagline">
-        {t('A minute with the booth. Speak it, or write it.')}
+        {t('Help shape originBI. Speak it, or write it.')}
       </p>
       <ModeToggle />
       <section className="cue-card glass">
@@ -278,7 +278,7 @@ export default function Voice() {
           </li>
           <li>
             <span>03</span>
-            <div>{t('Your requirement or pain point')}</div>
+            <div>{t('Your problems, suggestions or expected solutions')}</div>
           </li>
         </ol>
       </section>
@@ -363,9 +363,9 @@ export default function Voice() {
           disabled={recording || busy}
           maxLength={8000}
           placeholder={t(
-            '“Hi, I’m Priya from Green Valley Academy. My number is… We’re looking for a smarter way to…”',
+            '“I’m Priya from Green Valley Academy. My number is… I’d like originBI to add… Our current challenge is…”',
           )}
-          rows={4}
+          rows={3}
         />
         <div className="transcript-bottom">
           <span>
@@ -398,6 +398,6 @@ export default function Voice() {
           {t('Silence does not send anything. Tap stop, review, then submit.')}
         </p>
       </div>
-    </>
+    </div>
   );
 }

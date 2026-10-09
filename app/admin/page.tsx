@@ -12,6 +12,7 @@ import {
 import { Brand } from '@/components/mobile-shell';
 import { browserDB } from '@/lib/supabase-browser';
 import { csvCell } from '@/lib/client';
+import { feedbackCategories, hasFeedbackCategory } from '@/lib/feedback';
 type Lead = {
   id: string;
   created_at: string;
@@ -21,9 +22,6 @@ type Lead = {
   school_name: string | null;
   phone: string | null;
   email: string | null;
-  objective: string | null;
-  callback_slot: string | null;
-  callback_date: string | null;
   bullet_requirements: string[];
   raw_transcript: string | null;
   email_sent: boolean;
@@ -34,8 +32,7 @@ export default function Admin() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [objective, setObjective] = useState('');
-  const [slot, setSlot] = useState('');
+  const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
   const [live, setLive] = useState(false);
@@ -125,11 +122,10 @@ export default function Admin() {
   }
   const filtered = leads.filter(
     (l) =>
-      (!objective || l.objective === objective) &&
-      (!slot || l.callback_slot === slot) &&
+      (!category || hasFeedbackCategory(l.bullet_requirements ?? [], category)) &&
       (!status || l.status === status) &&
       (!search ||
-        [l.name, l.school_name, l.phone, l.email].some((s) =>
+        [l.name, l.school_name, l.phone, l.email, ...(l.bullet_requirements ?? [])].some((s) =>
           s?.toLowerCase().includes(search.toLowerCase()),
         )),
   );
@@ -143,9 +139,6 @@ export default function Admin() {
       'school_name',
       'phone',
       'email',
-      'objective',
-      'callback_date',
-      'callback_slot',
       'bullet_requirements',
       'raw_transcript',
       'email_sent',
@@ -155,7 +148,7 @@ export default function Admin() {
       [
         columns
           .map((c) =>
-            csvCell(c === 'school_name' ? 'institution_organisation_name' : c),
+            csvCell(c === 'school_name' ? 'institution_organisation_name' : c === 'bullet_requirements' ? 'feedback' : c),
           )
           .join(','),
         ...filtered.map((l) => columns.map((c) => csvCell(l[c])).join(',')),
@@ -165,10 +158,10 @@ export default function Admin() {
     );
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${APP_NAME.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `${APP_NAME.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-feedback-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    setNotice(`Exported ${filtered.length} leads from the current filters.`);
+    setNotice(`Exported ${filtered.length} responses from the current filters.`);
   }
   if (!ready)
     return (
@@ -188,7 +181,7 @@ export default function Admin() {
             <em>every conversation.</em>
           </h1>
           <p className="muted">
-            Sign in with your manager account to view the live lead feed.
+            Sign in with your manager account to view the live feedback feed.
           </p>
           <label>
             Email address
@@ -250,19 +243,19 @@ export default function Admin() {
         </button>
       </div>
       <section className="admin-heading">
-        <span className="eyebrow">SUMMIT CONNECT / BOOTH OVERVIEW</span>
+        <span className="eyebrow">ORIGINBI / VISITOR FEEDBACK</span>
         <h1>
-          Every introduction.
+          Every suggestion.
           <br />
           <em>One place.</em>
         </h1>
-        <p>Turn today’s conversations into tomorrow’s possibilities.</p>
+        <p>Understand institutional challenges and shape better solutions.</p>
       </section>
       <div className="stats">
         {[
-          ['Total introductions', leads.length],
+          ['Survey responses', leads.length],
           ['Confirmed', leads.filter((l) => l.status === 'confirmed').length],
-          ['Demo requests', leads.filter((l) => l.objective === 'Demo').length],
+          ['Feature suggestions', leads.filter((l) => hasFeedbackCategory(l.bullet_requirements ?? [], 'Feature request')).length],
           ['Needs review', leads.filter((l) => l.status === 'draft').length],
         ].map(([label, count]) => (
           <div className="stat glass" key={label}>
@@ -274,30 +267,14 @@ export default function Admin() {
       <div className="admin-filters">
         <Search size={17} className="muted" />
         <input
-          aria-label="Search leads"
+          aria-label="Search feedback"
           placeholder="Search name, institution, phone…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select
-          aria-label="Filter by objective"
-          value={objective}
-          onChange={(e) => setObjective(e.target.value)}
-        >
-          <option value="">All objectives</option>
-          {['Demo', 'Know More', 'Catch-up Call'].map((v) => (
-            <option key={v}>{v}</option>
-          ))}
-        </select>
-        <select
-          aria-label="Filter by callback slot"
-          value={slot}
-          onChange={(e) => setSlot(e.target.value)}
-        >
-          <option value="">All callback slots</option>
-          {['Morning', 'Afternoon', 'Evening'].map((v) => (
-            <option key={v}>{v}</option>
-          ))}
+        <select aria-label="Filter by feedback category" value={category} onChange={e => setCategory(e.target.value)}>
+          <option value="">All feedback categories</option>
+          {feedbackCategories.map(value => <option key={value}>{value}</option>)}
         </select>
         <select
           aria-label="Filter by status"
@@ -311,7 +288,7 @@ export default function Admin() {
         </select>
         <button
           className="secondary"
-          aria-label="Refresh leads"
+          aria-label="Refresh feedback"
           onClick={() => void load()}
         >
           <RefreshCw size={16} />
@@ -336,7 +313,7 @@ export default function Admin() {
         </p>
       )}
       <p className="muted" style={{ marginBottom: 14 }}>
-        {filtered.length} introductions · newest first
+        {filtered.length} responses · newest first
         {leads.length === 5000 ? ' · latest 5,000 records' : ''}
       </p>
       <div className="glass table-wrap">
@@ -346,10 +323,8 @@ export default function Admin() {
               {[
                 'Attendee',
                 'Contact',
-                'Objective',
-                'Callback · IST',
                 'Status',
-                'Requirements',
+                'Feedback',
               ].map((t) => (
                 <th key={t} scope="col">
                   {t}
@@ -362,7 +337,7 @@ export default function Admin() {
               <tr key={l.id}>
                 <td>
                   <span className="lead-name">
-                    {l.name || 'New voice introduction'}
+                    {l.name || 'New voice feedback'}
                   </span>
                   <small>{l.school_name || 'Institution not captured'}</small>
                   <small>
@@ -384,11 +359,6 @@ export default function Admin() {
                         ? 'Email pending'
                         : '—'}
                   </small>
-                </td>
-                <td>{l.objective || '—'}</td>
-                <td>
-                  {l.callback_date || 'Not scheduled'}
-                  <small>{l.callback_slot || '—'}</small>
                 </td>
                 <td>
                   <span className={'status-tag ' + l.status}>{l.status}</span>
@@ -423,8 +393,8 @@ export default function Admin() {
         {!filtered.length && (
           <div className="empty">
             {leads.length
-              ? 'No introductions match these filters.'
-              : 'Your next great conversation will appear here.'}
+              ? 'No responses match these filters.'
+              : 'Visitor feedback will appear here.'}
           </div>
         )}
       </div>

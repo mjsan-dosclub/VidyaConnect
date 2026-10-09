@@ -1265,3 +1265,35 @@ html[lang='ta'] h2 {
 }
 
 .audio-fallback {display:block;margin:0 auto 20px;border:0;background:transparent;color:var(--accent);text-decoration:underline;text-underline-offset:4px;font-size:13px;min-height:40px;}
+
+/* Compact survey capture with an always-visible review action. */
+.voice-survey { padding-bottom: 104px; }
+.voice-survey .capture-tagline { margin-bottom: 8px; font-size: 13px; }
+.voice-survey .mode-toggle { margin-bottom: 10px; }
+.voice-survey .cue-card { padding: 12px 16px; border-radius: 24px; }
+.voice-survey .cue-card h2 { font-size: 15px; margin-bottom: 8px; }
+.voice-survey .cue-card ol { gap: 6px; }
+.voice-survey .cue-card li { font-size: 13px; line-height: 1.4; }
+.voice-survey .record-zone { padding: 8px 0; }
+.voice-survey .mic-orbit { height: 96px; }
+.voice-survey .mic-button { width: 76px; height: 76px; }
+.voice-survey .waveform { top: 8px; height: 88px; }
+.voice-survey .record-zone strong { font-size: 13px; margin-top: 4px; }
+.voice-survey .audio-fallback { margin: 0 auto 6px; min-height: 44px; font-size: 12px; }
+.voice-survey .transcript-card { padding: 12px 16px; border-radius: 24px; }
+.voice-survey .transcript-card textarea { min-height: 76px; height: 76px; margin: 4px 0; }
+.voice-survey .transcript-heading { font-size: 14px; }
+.voice-survey .action-dock { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%, 448px); z-index: 20; margin: 0; padding: 10px 16px calc(8px + env(safe-area-inset-bottom)); background: #f6f4fff5; border-top: 1px solid #ddd8f0; backdrop-filter: blur(16px); }
+.voice-survey .action-dock p { font-size: 11px; line-height: 1.4; margin: 6px 0 0; }
+.mic-intro { width: min(92vw, 420px); max-height: 85dvh; overflow: auto; margin: auto; border: 1px solid #ded9ef; border-radius: 28px; padding: 24px; background: #fff; color: #150089; }
+.mic-intro::backdrop { background: #15008966; backdrop-filter: blur(5px); }
+.mic-intro h2 { margin: 12px 0; font-size: 21px; }
+.mic-intro p { font-size: 14px; line-height: 1.55; margin: 12px 0; color: #625b80; }
+.mic-intro p svg { vertical-align: middle; }
+.mic-intro button { width: 100%; margin-top: 10px; min-height: 44px; }
+@media (max-height: 740px) {
+  .mobile-shell { padding-top: 10px; }
+  .voice-survey .cue-card li { font-size: 12px; }
+  .voice-survey .mic-orbit { height: 82px; }
+  .voice-survey .record-zone { padding: 4px 0; }
+}

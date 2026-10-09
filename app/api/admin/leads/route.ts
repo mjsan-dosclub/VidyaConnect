@@ -5,7 +5,7 @@ export const GET = handle(async (req) => {
   const { data, error } = await db()
     .from('leads')
     .select(
-      'id,created_at,mode,status,name,phone,email,school_name,raw_transcript,bullet_requirements,callback_date,callback_slot,objective,email_sent',
+      'id,created_at,mode,status,name,phone,email,school_name,raw_transcript,bullet_requirements,email_sent',
     )
     .order('created_at', { ascending: false })
     .limit(5000);
