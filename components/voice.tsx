@@ -1,4 +1,6 @@
 'use client';
+import { PcmCapture, isIosDevice } from '@/lib/pcm-capture';
+import { AudioCapture, audioMime, blobBase64 } from '@/lib/audio-capture';
 import { useLanguage } from './language';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -48,17 +50,31 @@ export default function Voice() {
   const [error, setError] = useState('');
   const [phase, setPhase] = useState('');
   const rec = useRef<SpeechSession | null>(null);
+  const audio = useRef<AudioCapture | PcmCapture | null>(null);
+  const audioGeneration = useRef(0);
+  const audioPrefix = useRef('');
+  const [savedAudio, setSavedAudio] = useState<Blob | null>(null);
+  const [audioMode, setAudioMode] = useState(false);
   const textRef = useRef('');
   const reduced = useReducedMotion();
   useEffect(() => {
     const p = getSession();
     textRef.current = p.transcript ?? '';
     setText(textRef.current);
-    return () => rec.current?.dispose();
+    return () => {
+      rec.current?.dispose();
+      audio.current?.cancel();
+      audioGeneration.current++;
+    };
   }, []);
   useEffect(() => {
     rec.current?.dispose();
+    audio.current?.cancel();
+    audioGeneration.current++;
+    setSavedAudio(null);
+    setAudioMode(false);
     setRecording(false);
+    setBusy(false);
     setError('');
   }, [language]);
   function change(v: string) {
@@ -70,7 +86,8 @@ export default function Voice() {
   function listen() {
     setError('');
     if (recording) {
-      rec.current?.stop();
+      if (audioMode) void stopAudio();
+      else rec.current?.stop();
       return;
     }
     const win = window as unknown as {
@@ -78,15 +95,18 @@ export default function Voice() {
       webkitSpeechRecognition?: new () => Recognition;
     };
     const API = win.SpeechRecognition ?? win.webkitSpeechRecognition;
-    if (!API) {
-      setError(
-        t(
-          'Voice recognition is unavailable in this browser. You can type your introduction below.',
-        ),
-      );
-      document.getElementById('transcript')?.focus();
+    if (
+      !API ||
+      isIosDevice(
+        navigator.userAgent,
+        navigator.platform,
+        navigator.maxTouchPoints,
+      )
+    ) {
+      void startAudio();
       return;
     }
+    setAudioMode(false);
     const session = new SpeechSession({
       create: () => new API(),
       language: language === 'ta' ? 'ta-IN' : 'en-IN',
@@ -98,6 +118,126 @@ export default function Voice() {
     rec.current?.dispose();
     rec.current = session;
     session.start(textRef.current);
+  }
+
+  async function startAudio() {
+    rec.current?.dispose();
+    audio.current?.cancel();
+    const generation = ++audioGeneration.current;
+    setError('');
+    setSavedAudio(null);
+    setAudioMode(true);
+    setBusy(true);
+    audioPrefix.current = textRef.current;
+    if (
+      !navigator.mediaDevices?.getUserMedia ||
+      (!isIosDevice(
+        navigator.userAgent,
+        navigator.platform,
+        navigator.maxTouchPoints,
+      ) &&
+        typeof MediaRecorder === 'undefined')
+    ) {
+      setBusy(false);
+      setAudioMode(false);
+      setError(
+        t(
+          'Audio recording is unavailable. Please type below or use Manual Form.',
+        ),
+      );
+      return;
+    }
+    const onCaptureError = (message: string) => {
+      if (generation !== audioGeneration.current) return;
+      setRecording(false);
+      setBusy(false);
+      setError(t(message));
+    };
+    const capture = isIosDevice(
+      navigator.userAgent,
+      navigator.platform,
+      navigator.maxTouchPoints,
+    )
+      ? new PcmCapture({ onError: onCaptureError })
+      : new AudioCapture({
+          getStream: () => navigator.mediaDevices.getUserMedia({ audio: true }),
+          create: (stream) => {
+            const mime = audioMime((m) => MediaRecorder.isTypeSupported(m));
+            return new MediaRecorder(stream, {
+              ...(mime ? { mimeType: mime } : {}),
+              audioBitsPerSecond: 64000,
+            });
+          },
+          onError: (message) => {
+            if (generation !== audioGeneration.current) return;
+            setRecording(false);
+            setBusy(false);
+            setError(t(message));
+          },
+        });
+    audio.current = capture;
+    try {
+      if ((await capture.start()) && generation === audioGeneration.current)
+        setRecording(true);
+    } catch {
+      if (generation === audioGeneration.current)
+        setError(
+          t(
+            'Microphone permission was denied. Enable it in browser settings or type below.',
+          ),
+        );
+    } finally {
+      if (generation === audioGeneration.current) setBusy(false);
+    }
+  }
+  async function transcribeAudio(
+    blob: Blob,
+    generation = audioGeneration.current,
+  ) {
+    setBusy(true);
+    setError('');
+    setPhase(t('Transcribing your recording…'));
+    try {
+      const result = await post('/api/transcribe', {
+        audio: await blobBase64(blob),
+        mime: blob.type.split(';')[0],
+        language,
+      });
+      if (generation !== audioGeneration.current) return;
+      if (!result.transcript?.trim())
+        throw new Error(
+          t('No speech was heard. Please try again or type below.'),
+        );
+      change(
+        [audioPrefix.current, result.transcript.trim()]
+          .filter(Boolean)
+          .join(' ')
+          .slice(0, 8000),
+      );
+      setSavedAudio(null);
+    } catch (e) {
+      if (generation === audioGeneration.current)
+        setError(e instanceof Error ? e.message : t('Please try again'));
+    } finally {
+      if (generation === audioGeneration.current) {
+        setBusy(false);
+        setPhase('');
+      }
+    }
+  }
+  async function stopAudio() {
+    const generation = audioGeneration.current;
+    setRecording(false);
+    setBusy(true);
+    const blob = await audio.current?.stop();
+    if (generation !== audioGeneration.current) return;
+    if (!blob?.size) {
+      setBusy(false);
+      setError(t('No speech was heard. Please try again or type below.'));
+      return;
+    }
+    setSavedAudio(blob);
+    await transcribeAudio(blob, generation);
   }
 
   async function processVoice() {
@@ -179,11 +319,35 @@ export default function Voice() {
           </button>
         </div>
         <strong aria-live="polite">
-          {recording
-            ? t('Listening. Tap stop when you are done.')
-            : t('Tap the mic. Speak in English or Tamil.')}
+          {busy
+            ? phase || t('Opening microphone…')
+            : recording
+              ? t(
+                  audioMode
+                    ? 'Recording. Tap Stop to see your words.'
+                    : 'Listening. Tap stop when you are done.',
+                )
+              : t('Tap the mic. Speak in English or Tamil.')}
         </strong>
       </section>
+      {!recording && !busy && (
+        <button
+          type="button"
+          className="audio-fallback"
+          onClick={() => void startAudio()}
+        >
+          {t('Use audio recording')}
+        </button>
+      )}
+      {savedAudio && !busy && (
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => void transcribeAudio(savedAudio)}
+        >
+          {t('Retry transcription')}
+        </button>
+      )}
       <section className="transcript-card glass">
         <div className="transcript-heading">
           <label htmlFor="transcript">{t('Live transcript')}</label>

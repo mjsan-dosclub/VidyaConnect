@@ -1,5 +1,20 @@
 export type Language = 'en' | 'ta';
 export const tamil: Record<string, string> = {
+  'Opening microphone…': 'மைக்ரோஃபோன் திறக்கப்படுகிறது…',
+  'Recording. Tap Stop to see your words.':
+    'பதிவு நடைபெறுகிறது. உரையைப் பார்க்க நிறுத்து பொத்தானைத் தொடுங்கள்.',
+  'Transcribing your recording…': 'உங்கள் குரல் உரையாக மாற்றப்படுகிறது…',
+  'Use audio recording': 'ஒலிப் பதிவைப் பயன்படுத்தவும்',
+  'Retry transcription': 'உரை மாற்றத்தை மீண்டும் முயற்சிக்கவும்',
+  'Audio recording is unavailable. Please type below or use Manual Form.':
+    'ஒலிப் பதிவு கிடைக்கவில்லை. கீழே எழுதவும் அல்லது படிவத்தைப் பயன்படுத்தவும்.',
+  'No speech was heard. Please try again or type below.':
+    'குரல் கேட்கவில்லை. மீண்டும் முயற்சிக்கவும் அல்லது கீழே எழுதவும்.',
+  'The recording is too large. Please record a shorter introduction.':
+    'ஒலிப் பதிவு மிகப் பெரியது. சுருக்கமாக மீண்டும் பதிவு செய்யவும்.',
+  'Could not record audio. Please retry or type below.':
+    'ஒலியைப் பதிவு செய்ய முடியவில்லை. மீண்டும் முயற்சிக்கவும் அல்லது கீழே எழுதவும்.',
+
   'A minute with the booth. Speak it, or write it.':
     'ஒரு நிமிடத்தில் எங்களுடன் இணையுங்கள். பேசுங்கள் அல்லது எழுதுங்கள்.',
   'Capture mode': 'தகவல் பதிவு முறை',

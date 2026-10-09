@@ -64,6 +64,7 @@ export async function limited(req: NextRequest) {
 export function handle(
   fn: (req: NextRequest) => Promise<unknown>,
   rate = true,
+  maxBytes = 20000,
 ) {
   return async (req: NextRequest) => {
     try {
@@ -73,9 +74,9 @@ export function handle(
       )
         return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
       if (
-        Number(req.headers.get('content-length') ?? 0) > 20000 ||
+        Number(req.headers.get('content-length') ?? 0) > maxBytes ||
         (req.method === 'POST' &&
-          new TextEncoder().encode(await req.clone().text()).length > 20000)
+          new TextEncoder().encode(await req.clone().text()).length > maxBytes)
       )
         return NextResponse.json(
           { error: 'Request too large' },
