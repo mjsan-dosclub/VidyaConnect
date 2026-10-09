@@ -21,7 +21,7 @@ export default function ThankYou({
       <Head />
       <Preview>Thank you for connecting with {APP_NAME}</Preview>
       <Body
-        style={{ backgroundColor: '#f4f6f8', fontFamily: 'Arial,sans-serif' }}
+        style={{ backgroundColor: '#f6f4ff', fontFamily: 'Arial,sans-serif' }}
       >
         <Container
           style={{
@@ -31,7 +31,7 @@ export default function ThankYou({
             borderRadius: 16,
           }}
         >
-          <Text style={{ color: '#657727' }}>
+          <Text style={{ color: '#150089' }}>
             {APP_NAME} · Conversations that move education forward
           </Text>
           <Heading>Thank you, {name}.</Heading>

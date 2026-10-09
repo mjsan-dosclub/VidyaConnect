@@ -1,4 +1,4 @@
-# Deploy VidyaConnect to Vercel
+# Deploy originbi to Vercel
 
 The source is prepared for Vercel. A live deployment still requires your service accounts and credentials. Do not upload `.env.local`, `.local/`, or local lead records.
 
@@ -11,7 +11,7 @@ The source is prepared for Vercel. A live deployment still requires your service
 
 | Variable                      | Set to                                                                                | Browser-visible? |
 | ----------------------------- | ------------------------------------------------------------------------------------- | ---------------- |
-| NEXT_PUBLIC_APP_NAME          | VidyaConnect                                                                          | Yes              |
+| NEXT_PUBLIC_APP_NAME          | originbi                                                                          | Yes              |
 | NEXT_PUBLIC_APP_URL           | Your actual canonical HTTPS app domain, with no path                                  | Yes              |
 | NEXT_PUBLIC_SUPABASE_URL      | Your Supabase project HTTPS URL                                                       | Yes              |
 | NEXT_PUBLIC_SUPABASE_ANON_KEY | Your Supabase anonymous/publishable client key                                        | Yes              |
@@ -19,7 +19,7 @@ The source is prepared for Vercel. A live deployment still requires your service
 | GEMINI_API_KEY                | Your Google AI Studio Gemini API key                                                  | No               |
 | GEMINI_MODEL                  | gemini-3.5-flash-lite, or a supported structured-output model available to your account    | No               |
 | RESEND_API_KEY                | Your Resend API key                                                                   | No               |
-| EMAIL_FROM                    | VidyaConnect &lt;hello@your-verified-domain.com&gt; using a domain verified in Resend | No               |
+| EMAIL_FROM                    | originbi &lt;hello@your-verified-domain.com&gt; using a domain verified in Resend | No               |
 | CRON_SECRET                   | An independent random secret, at least 32 characters                                  | No               |
 | RATE_LIMIT_SALT               | A different independent random secret, at least 32 characters                         | No               |
 | LOCAL_PREVIEW_MODE            | false                                                                                 | No               |
@@ -55,3 +55,5 @@ The Gemini API key stays on the server. The extraction route allows up to 60 sec
 - [Vercel environment variables](https://vercel.com/docs/environment-variables)
 - [MDN SpeechRecognition compatibility](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition)
 - [Gemini API keys](https://ai.google.dev/gemini-api/docs/api-key)
+
+The displayed application name is fixed to originbi. A legacy NEXT_PUBLIC_APP_NAME value is ignored. The existing Vercel URL and Git repository remain usable after rebranding.

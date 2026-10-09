@@ -1,4 +1,5 @@
 'use client';
+import { useLanguage } from '@/components/language';
 import { APP_NAME } from '@/lib/brand';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,6 +8,7 @@ import { Check, ArrowRight, LoaderCircle } from 'lucide-react';
 import { getSession, LeadSession, post } from '@/lib/client';
 import { details } from '@/lib/validation';
 export default function Confirmation() {
+  const { t } = useLanguage();
   const [lead, setLead] = useState<LeadSession | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -19,7 +21,8 @@ export default function Confirmation() {
     }
     setLead(p);
   }, [router]);
-  if (!lead) return <p className="center muted">Loading your introduction…</p>;
+  if (!lead)
+    return <p className="center muted">{t('Loading your introduction…')}</p>;
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -58,22 +61,23 @@ export default function Confirmation() {
   return (
     <>
       <section className="intro">
-        <span className="eyebrow">A LITTLE CHECK BEFORE WE CONNECT</span>
+        <span className="eyebrow">{t('A LITTLE CHECK BEFORE WE CONNECT')}</span>
         <h1>
-          Thank you, <em>{lead.name || 'there'}.</em>
+          {t('Thank you,')} <em>{lead.name || 'there'}.</em>
         </h1>
         <p>
-          Please confirm your mobile number:
+          {t('Please confirm your mobile number:')}
           <br />
-          <strong>{lead.phone || 'Add your number below'}</strong>
+          <strong>{lead.phone || t('Add your number below')}</strong>
         </p>
       </section>
       {lead.manual_review && (
         <div className="local-notice" role="status">
-          Your transcript is saved on this computer. AI is not connected in this
-          local preview; please fill in and review your details below.
+          {t(
+            'Your transcript is saved on this computer. AI is not connected in this local preview; please fill in and review your details below.',
+          )}
           <details>
-            <summary>View your transcript</summary>
+            <summary>{t('View your transcript')}</summary>
             <p>{lead.transcript}</p>
           </details>
         </div>
@@ -81,22 +85,22 @@ export default function Confirmation() {
       <div className="step-row">
         <span className="step">
           <Check size={15} />
-          <small>Share</small>
+          <small>{t('Share')}</small>
         </span>
         <i />
         <span className="step active">
-          2 <small>Review</small>
+          2 <small>{t('Review')}</small>
         </span>
         <i />
         <span className="step">
-          3 <small>Connect</small>
+          3 <small>{t('Connect')}</small>
         </span>
       </div>
       <form className="form-stack" onSubmit={submit}>
         <div className="glass form-card">
-          <h2>Let’s make sure we got it right</h2>
+          <h2>{t('Let’s make sure we got it right')}</h2>
           <label>
-            Your name
+            {t('Your name')}
             <input
               name="name"
               defaultValue={lead.name}
@@ -106,7 +110,7 @@ export default function Confirmation() {
             />
           </label>
           <label>
-            Mobile number
+            {t('Mobile number')}
             <div className="phone-field">
               <span>+91</span>
               <input
@@ -121,7 +125,7 @@ export default function Confirmation() {
             </div>
           </label>
           <label>
-            Institution / organisation name
+            {t('Institution / organisation name')}
             <input
               name="school_name"
               defaultValue={lead.school_name ?? ''}
@@ -129,21 +133,21 @@ export default function Confirmation() {
             />
           </label>
           <label>
-            Email{' '}
+            {t('Email')}{' '}
             <small className="muted">
-              · optional, for your thank-you email
+              {t('· optional, for your thank-you email')}
             </small>
             <input
               name="email"
               type="email"
               autoComplete="email"
-              placeholder="you@organisation.edu"
+              placeholder={t('you@organisation.edu')}
               maxLength={254}
             />
           </label>
         </div>
         <div className="glass form-card">
-          <h2>Your requirements</h2>
+          <h2>{t('Your requirements')}</h2>
           <ul className="requirements">
             {lead.requirements_summary?.length ? (
               lead.requirements_summary.map((r, i) => (
@@ -153,12 +157,12 @@ export default function Confirmation() {
                 </li>
               ))
             ) : (
-              <li>Add the requirements from your introduction below.</li>
+              <li>{t('Add the requirements from your introduction below.')}</li>
             )}
           </ul>
           <label>
-            Edit your requirements{' '}
-            <small className="muted">· one per line</small>
+            {t('Edit your requirements')}{' '}
+            <small className="muted">{t('· one per line')}</small>
             <textarea
               name="requirements"
               rows={3}
@@ -167,19 +171,19 @@ export default function Confirmation() {
             />
           </label>
           <label>
-            Your next step
+            {t('Your next step')}
             <select name="objective" defaultValue={lead.detected_objective}>
-              <option>Demo</option>
-              <option>Know More</option>
-              <option>Catch-up Call</option>
+              <option value="Demo">{t('Demo')}</option>
+              <option value="Know More">{t('Know More')}</option>
+              <option value="Catch-up Call">{t('Catch-up Call')}</option>
             </select>
           </label>
         </div>
         <label className="consent">
           <input name="consent" type="checkbox" required />
           <span>
-            I agree to be contacted by the {APP_NAME} team about my
-            institution’s requirements.
+            {t('I agree to be contacted by the')} {APP_NAME}{' '}
+            {t('team about my institution’s requirements.')}
           </span>
         </label>
         {error && (
@@ -193,11 +197,11 @@ export default function Confirmation() {
           ) : (
             <Check size={18} />
           )}{' '}
-          {busy ? 'Confirming…' : 'Confirm & Send'}
+          {t(busy ? 'Confirming…' : 'Confirm & Send')}
           <ArrowRight size={18} />
         </button>
         <Link href="/" className="center muted">
-          Back to my introduction
+          {t('Back to my introduction')}
         </Link>
       </form>
     </>

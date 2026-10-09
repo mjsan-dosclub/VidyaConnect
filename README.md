@@ -1,4 +1,4 @@
-# VidyaConnect
+# originbi
 
 Repository: https://github.com/mjsan-dosclub/VidyaConnect
 
@@ -79,4 +79,8 @@ Live Supabase/Gemini/Resend behavior and physical-device speech require credenti
 
 ## Brand and terminology
 
-The application is named VidyaConnect. Set NEXT_PUBLIC_APP_NAME to change the displayed brand and redeploy. Visible fields use “Institution / organisation name”; the existing school_name database field and API key are retained for backward compatibility. CSV exports label it institution_organisation_name.
+The application is named originbi. Set NEXT_PUBLIC_APP_NAME to change the displayed brand and redeploy. Visible fields use “Institution / organisation name”; the existing school_name database field and API key are retained for backward compatibility. CSV exports label it institution_organisation_name.
+
+## originbi theme and languages
+
+The attendee interface follows the OriginVoice-Feedback reference: original logo, lavender background (#f6f4ff), indigo (#150089), green recording accent (#1ed36a), Roboto/Poppins typography and compact glass cards. English/Tamil selection persists on the device, selects en-IN/ta-IN speech recognition and controls the language of AI requirement summaries. Changing language stops the current recording safely; tap the mic again to use the new language. Names and raw transcripts are preserved. Browser speech recognition support varies; the editable transcript and manual form remain available.

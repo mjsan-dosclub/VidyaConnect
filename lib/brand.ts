@@ -1,2 +1,1 @@
-export const APP_NAME =
-  process.env.NEXT_PUBLIC_APP_NAME?.trim() || 'VidyaConnect';
+export const APP_NAME = 'originbi';

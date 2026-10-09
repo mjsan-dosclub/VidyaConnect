@@ -27,7 +27,7 @@ export async function sendPending(id?: string) {
     try {
       const res = await new Resend(process.env.RESEND_API_KEY).emails.send(
         {
-          from: process.env.EMAIL_FROM,
+          from: process.env.EMAIL_FROM.replace(/^[^<]+(?=<)/, `${APP_NAME} `),
           to: lead.email,
           subject: `Thank you for connecting with ${APP_NAME}`,
           react: (

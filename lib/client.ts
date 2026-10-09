@@ -2,6 +2,7 @@ export type LeadSession = {
   id: string;
   token: string;
   transcript?: string;
+  language?: 'en' | 'ta';
   local_mode?: boolean;
   manual_review?: boolean;
   name?: string;

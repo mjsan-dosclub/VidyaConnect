@@ -1,4 +1,5 @@
 'use client';
+import { LanguageSelector, useLanguage } from './language';
 import { APP_NAME } from '@/lib/brand';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -8,10 +9,12 @@ import { Sparkles, Smartphone, ArrowUpRight, ShieldCheck } from 'lucide-react';
 export function Brand() {
   return (
     <Link href="/" className="brand" aria-label={`${APP_NAME} home`}>
-      <span className="brand-icon">
-        <Sparkles size={22} />
-      </span>
-      <span>{APP_NAME}</span>
+      <img
+        src="/origin-logo.png"
+        alt="originbi — Beyond Intelligence"
+        width={160}
+        height={40}
+      />
     </Link>
   );
 }
@@ -20,6 +23,7 @@ export default function MobileShell({
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useLanguage();
   const path = usePathname();
   const [url, setUrl] = useState('');
   const [wide, setWide] = useState(false);
@@ -42,28 +46,33 @@ export default function MobileShell({
       <div className="desktop-blocker">
         <div className="blocker-card glass">
           <Brand />
-          <span className="eyebrow">MADE FOR MOMENTS THAT MATTER</span>
+          <span className="eyebrow">{t('MADE FOR MOMENTS THAT MATTER')}</span>
           <div className="phone-icon">
             <Smartphone size={36} />
           </div>
           <h1>
-            Good conversations.
+            {t('Good conversations.')}
             <br />
-            On the go.
+            {t('On the go.')}
           </h1>
-          <h2>Mobile Only Experience</h2>
+          <h2>{t('Mobile Only Experience')}</h2>
           <p>
-            {APP_NAME} is optimized for mobile on-site attendees. Please scan
-            this QR code with your mobile device to continue.
+            {APP_NAME}{' '}
+            {t(
+              'is optimized for mobile on-site attendees. Please scan this QR code with your mobile device to continue.',
+            )}
           </p>
           <div className="qr">
             {url && (
               <QRCodeSVG value={url} size={176} level="M" marginSize={2} />
             )}
           </div>
-          <span className="muted">Open your camera. Scan. Let’s connect.</span>
+          <span className="muted">
+            {t('Open your camera. Scan. Let’s connect.')}
+          </span>
           <Link className="admin-link" href="/admin">
-            Booth manager portal <ArrowUpRight size={16} />
+            {t('Booth manager portal')}
+            <ArrowUpRight size={16} />
           </Link>
         </div>
       </div>
@@ -71,14 +80,14 @@ export default function MobileShell({
         <main className="mobile-shell">
           <header>
             <Brand />
-            <span className="summit-badge">
-              <span /> SUMMIT CONNECT
-            </span>
+            <Link href="/admin">{t('Desk')}</Link>
           </header>
+          <LanguageSelector />
           {children}
           <footer>
-            <ShieldCheck size={14} /> Your details. A more personal follow-up.
-            <Link href="/admin" aria-label="Booth manager portal">
+            <ShieldCheck size={14} />
+            {t('Your details. A more personal follow-up.')}
+            <Link href="/admin" aria-label={t('Booth manager portal')}>
               <ArrowUpRight size={15} />
             </Link>
           </footer>

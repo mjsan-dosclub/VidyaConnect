@@ -19,13 +19,16 @@ export function speechText(results: ArrayLike<SpeechResult>, android: boolean) {
     const text = result[0].transcript.trim();
     if (!text) continue;
     const previous = segments.at(-1);
-    if (previous && (android || !previous.final) &&
+    if (
+      previous &&
+      (android || !previous.final) &&
       (text.toLowerCase() === previous.text.toLowerCase() ||
-       text.toLowerCase().startsWith(previous.text.toLowerCase() + ' '))) {
+        text.toLowerCase().startsWith(previous.text.toLowerCase() + ' '))
+    ) {
       segments[segments.length - 1] = { text, final: result.isFinal };
     } else segments.push({ text, final: result.isFinal });
   }
-  return segments.map(s => s.text).join(' ');
+  return segments.map((s) => s.text).join(' ');
 }
 
 export class SpeechSession {
@@ -33,14 +36,17 @@ export class SpeechSession {
   private restart: ReturnType<typeof setTimeout> | undefined;
   private listening = false;
   private text = '';
-  constructor(private options: {
-    create: () => Recognition;
-    android: boolean;
-    onText: (text: string) => void;
-    onListening: (listening: boolean) => void;
-    onError: (message: string) => void;
-    restartDelay?: number;
-  }) {}
+  constructor(
+    private options: {
+      create: () => Recognition;
+      android: boolean;
+      language?: 'en-IN' | 'ta-IN';
+      onText: (text: string) => void;
+      onListening: (listening: boolean) => void;
+      onError: (message: string) => void;
+      restartDelay?: number;
+    },
+  ) {}
   start(text: string) {
     this.dispose();
     this.text = text.trim();
@@ -56,36 +62,44 @@ export class SpeechSession {
     // Short final-result sessions are restarted while the user wants to listen.
     recognition.continuous = !this.options.android;
     recognition.interimResults = !this.options.android;
-    recognition.lang = 'en-IN';
+    recognition.lang = this.options.language ?? 'en-IN';
     const base = this.text;
-    recognition.onresult = event => {
+    recognition.onresult = (event) => {
       if (this.recognition !== recognition) return;
       const spoken = speechText(event.results, this.options.android);
       this.text = [base, spoken].filter(Boolean).join(' ').slice(0, 8000);
       this.options.onText(this.text);
     };
-    recognition.onerror = event => {
+    recognition.onerror = (event) => {
       if (this.recognition !== recognition || !this.listening) return;
       if (event.error === 'no-speech') return;
       this.listening = false;
       this.options.onListening(false);
-      this.options.onError(event.error === 'not-allowed' || event.error === 'service-not-allowed'
-        ? 'Microphone permission was denied. Enable it in browser settings or type below.'
-        : 'The microphone connection was interrupted. Your transcript is saved; tap to retry or type below.');
+      this.options.onError(
+        event.error === 'not-allowed' || event.error === 'service-not-allowed'
+          ? 'Microphone permission was denied. Enable it in browser settings or type below.'
+          : 'The microphone connection was interrupted. Your transcript is saved; tap to retry or type below.',
+      );
     };
     recognition.onend = () => {
       if (this.recognition !== recognition) return;
       this.recognition = null;
       if (this.listening) {
-        this.restart = setTimeout(() => this.begin(), this.options.restartDelay ?? 300);
+        this.restart = setTimeout(
+          () => this.begin(),
+          this.options.restartDelay ?? 300,
+        );
       } else this.options.onListening(false);
     };
-    try { recognition.start(); }
-    catch {
+    try {
+      recognition.start();
+    } catch {
       this.listening = false;
       this.recognition = null;
       this.options.onListening(false);
-      this.options.onError('Could not start the microphone. Your transcript is saved; please try again or type below.');
+      this.options.onError(
+        'Could not start the microphone. Your transcript is saved; please try again or type below.',
+      );
     }
   }
   stop() {

@@ -1,4 +1,5 @@
 'use client';
+import { useLanguage } from './language';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -16,15 +17,16 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { getSession, saveSession, post } from '@/lib/client';
 import { SpeechSession, type Recognition } from '@/lib/speech-session';
 export function ModeToggle({ manual = false }: { manual?: boolean }) {
+  const { t } = useLanguage();
   return (
-    <nav className="mode-toggle glass" aria-label="Capture mode">
+    <nav className="mode-toggle glass" aria-label={t('Capture mode')}>
       <Link
         href="/"
         aria-current={!manual ? 'page' : undefined}
         className={!manual ? 'selected' : ''}
       >
         <Mic size={17} />
-        Voice Mode
+        {t('Voice Mode')}
       </Link>
       <Link
         href="/form"
@@ -32,12 +34,13 @@ export function ModeToggle({ manual = false }: { manual?: boolean }) {
         className={manual ? 'selected' : ''}
       >
         <PenLine size={17} />
-        Manual Form
+        {t('Manual Form')}
       </Link>
     </nav>
   );
 }
 export default function Voice() {
+  const { language, t } = useLanguage();
   const router = useRouter();
   const [text, setText] = useState('');
   const [recording, setRecording] = useState(false);
@@ -53,6 +56,11 @@ export default function Voice() {
     setText(textRef.current);
     return () => rec.current?.dispose();
   }, []);
+  useEffect(() => {
+    rec.current?.dispose();
+    setRecording(false);
+    setError('');
+  }, [language]);
   function change(v: string) {
     textRef.current = v;
     setText(v);
@@ -72,17 +80,20 @@ export default function Voice() {
     const API = win.SpeechRecognition ?? win.webkitSpeechRecognition;
     if (!API) {
       setError(
-        'Voice recognition is unavailable in this browser. You can type your introduction below.',
+        t(
+          'Voice recognition is unavailable in this browser. You can type your introduction below.',
+        ),
       );
       document.getElementById('transcript')?.focus();
       return;
     }
     const session = new SpeechSession({
       create: () => new API(),
+      language: language === 'ta' ? 'ta-IN' : 'en-IN',
       android: /Android/i.test(navigator.userAgent),
       onText: change,
       onListening: setRecording,
-      onError: setError,
+      onError: (message) => setError(t(message)),
     });
     rec.current?.dispose();
     rec.current = session;
@@ -94,11 +105,11 @@ export default function Voice() {
     setError('');
     try {
       const p = getSession();
-      saveSession({ ...p, transcript: text });
-      setPhase('Saving your introduction…');
-      await post('/api/draft', { ...p, transcript: text });
-      setPhase('Preparing your review…');
-      const result = await post('/api/parse-voice', p);
+      saveSession({ ...p, transcript: text, language });
+      setPhase(t('Saving your introduction…'));
+      await post('/api/draft', { ...p, transcript: text, language });
+      setPhase(t('Preparing your review…'));
+      const result = await post('/api/parse-voice', { ...p, language });
       saveSession({ ...p, transcript: text, ...result });
       router.push('/confirmation');
     } catch (e) {
@@ -110,88 +121,28 @@ export default function Voice() {
   }
   return (
     <>
-      <section className="intro">
-        <span className="eyebrow">
-          <span className="live-dot" /> A BETTER WAY TO CONNECT
-        </span>
-        <h1>
-          Your institution’s next chapter
-          <br />
-          starts with <em>a conversation.</em>
-        </h1>
-        <p>
-          Skip the queue. Tell us what’s on your mind.
-          <br />
-          We’ll take care of the details.
-        </p>
-      </section>
+      <p className="capture-tagline">
+        {t('A minute with the booth. Speak it, or write it.')}
+      </p>
       <ModeToggle />
-      <div className="step-row">
-        <span className="step active">
-          1 <small>Share</small>
-        </span>
-        <i />
-        <span className="step">
-          2 <small>Review</small>
-        </span>
-        <i />
-        <span className="step">
-          3 <small>Connect</small>
-        </span>
-      </div>
       <section className="cue-card glass">
-        <div className="card-heading">
-          <span className="tiny-icon">
-            <AudioLines size={18} />
-          </span>
-          <div>
-            <h2>Speak naturally. We’re listening.</h2>
-            <p>A quick introduction is all it takes.</p>
-          </div>
-          <span className="pill">~30 sec</span>
-        </div>
+        <h2>{t('Speak in Tamil, English, or both')}</h2>
         <ol>
           <li>
             <span>01</span>
-            <div>Your name & institution / organisation name</div>
+            <div>{t('Your name and institution / organisation')}</div>
           </li>
           <li>
             <span>02</span>
-            <div>Your 10-digit mobile number</div>
+            <div>{t('Your 10-digit mobile number')}</div>
           </li>
           <li>
             <span>03</span>
-            <div>Your requirement or pain point</div>
+            <div>{t('Your requirement or pain point')}</div>
           </li>
         </ol>
       </section>
       <section className="record-zone">
-        <div className={'mic-orbit ' + (recording ? 'listening' : '')}>
-          <button
-            className="mic-button"
-            onClick={listen}
-            disabled={busy}
-            aria-label={recording ? 'Stop recording' : 'Start recording'}
-            aria-pressed={recording}
-          >
-            {recording ? (
-              <>
-                <Square size={26} fill="currentColor" aria-hidden="true" />
-                <span className="mic-control-label">Stop</span>
-              </>
-            ) : (
-              <Mic size={34} />
-            )}
-          </button>
-        </div>
-        <strong>
-          {recording ? 'Listening to you…' : 'Tap to start speaking'}
-        </strong>
-        <p>
-          {recording
-            ? 'Tap again when you’re finished.'
-            : 'A little about you. A lot of possibilities.'}
-        </p>
         <div className="waveform" aria-hidden="true">
           {Array.from({ length: 29 }, (_, i) => (
             <motion.span
@@ -209,12 +160,36 @@ export default function Voice() {
             />
           ))}
         </div>
+        <div className={'mic-orbit ' + (recording ? 'listening' : '')}>
+          <button
+            className="mic-button"
+            onClick={listen}
+            disabled={busy}
+            aria-label={t(recording ? 'Stop recording' : 'Start recording')}
+            aria-pressed={recording}
+          >
+            {recording ? (
+              <>
+                <Square size={26} fill="currentColor" aria-hidden="true" />
+                <span className="mic-control-label">{t('Stop')}</span>
+              </>
+            ) : (
+              <Mic size={34} />
+            )}
+          </button>
+        </div>
+        <strong aria-live="polite">
+          {recording
+            ? t('Listening. Tap stop when you are done.')
+            : t('Tap the mic. Speak in English or Tamil.')}
+        </strong>
       </section>
       <section className="transcript-card glass">
         <div className="transcript-heading">
-          <label htmlFor="transcript">YOUR INTRODUCTION</label>
+          <label htmlFor="transcript">{t('Live transcript')}</label>
           <span>
-            <PenLine size={12} /> Tap to edit
+            <PenLine size={12} />
+            {t('Tap to edit')}
           </span>
         </div>
         <textarea
@@ -223,12 +198,15 @@ export default function Voice() {
           onChange={(e) => change(e.target.value)}
           disabled={recording || busy}
           maxLength={8000}
-          placeholder="“Hi, I’m Priya from Green Valley Academy. My number is… We’re looking for a smarter way to…”"
+          placeholder={t(
+            '“Hi, I’m Priya from Green Valley Academy. My number is… We’re looking for a smarter way to…”',
+          )}
           rows={4}
         />
         <div className="transcript-bottom">
           <span>
-            <Check size={12} /> Always review before sending
+            <Check size={12} />
+            {t('Review your words before sending')}
           </span>
           <span>{text.length}/8000</span>
         </div>
@@ -249,10 +227,12 @@ export default function Voice() {
           ) : (
             <Sparkles size={18} />
           )}{' '}
-          {busy ? phase : 'Submit'}
+          {busy ? phase : t('Submit')}
           {!busy && <ArrowRight size={18} />}
         </button>
-        <p>One conversation. A tailored next step.</p>
+        <p>
+          {t('Silence does not send anything. Tap stop, review, then submit.')}
+        </p>
       </div>
     </>
   );
