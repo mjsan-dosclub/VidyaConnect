@@ -1,5 +1,12 @@
 export type Language = 'en' | 'ta';
 export const tamil: Record<string, string> = {
+  'digits captured': 'இலக்கங்கள் பதிவாகியுள்ளன',
+  'extra. Please remove the extra digits.': 'இலக்கங்கள் கூடுதலாக உள்ளன. கூடுதல் இலக்கங்களை நீக்கவும்.',
+  'missing. Please add the missing digits.': 'இலக்கங்கள் குறைவாக உள்ளன. விடுபட்ட இலக்கங்களைச் சேர்க்கவும்.',
+  'An Indian mobile number must start with 6, 7, 8 or 9.': 'இந்திய அலைபேசி எண் 6, 7, 8 அல்லது 9-இல் தொடங்க வேண்டும்.',
+  '10 digits. Please check that this is your number.': '10 இலக்கங்கள் உள்ளன. இது உங்கள் எண்ணா எனச் சரிபார்க்கவும்.',
+  'No number was captured. Please enter your mobile number.': 'எண் பதிவாகவில்லை. உங்கள் அலைபேசி எண்ணை உள்ளிடவும்.',
+
 "Help shape originBI. Speak it, or write it.": "originBI-ஐ மேம்படுத்த உதவுங்கள். பேசுங்கள் அல்லது எழுதுங்கள்.",
 "Your problems, suggestions or expected solutions": "உங்கள் சிக்கல்கள், பரிந்துரைகள் அல்லது எதிர்பார்க்கும் தீர்வுகள்",
 "Your feedback on originBI": "originBI பற்றிய உங்கள் கருத்துகள்",

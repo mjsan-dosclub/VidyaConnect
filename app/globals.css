@@ -1297,3 +1297,6 @@ html[lang='ta'] h2 {
   .voice-survey .mic-orbit { height: 82px; }
   .voice-survey .record-zone { padding: 4px 0; }
 }
+
+.mobile-review-hint { display: block; font-size: 13px; line-height: 1.5; color: #625b80; margin-top: 6px; }
+.phone-field:has(input[aria-invalid="true"]) { border-color: #b45309; }

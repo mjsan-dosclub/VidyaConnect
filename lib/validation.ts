@@ -8,7 +8,7 @@ export const identity = z.object({
 });
 export const extraction = z.object({
   name: z.string().max(120),
-  phone: z.string().regex(/^(?:[6-9]\d{9})?$/),
+  phone: z.string().regex(/^\d{0,20}$/),
   school_name: z.string().max(200).nullable(),
   requirements_summary: z.array(z.string().max(400)).max(8),
 });

@@ -43,7 +43,7 @@ const repeats: Record<string, number> = {
 };
 // Only contiguous digit groups qualify. Never gather unrelated dates/counts
 // throughout a conversation or guess a partial/ambiguous mobile number.
-export function phoneCandidates(transcript: string): string[] {
+function digitRuns(transcript: string): string[] {
   const text = transcript
     .normalize('NFC')
     .toLowerCase()
@@ -56,7 +56,7 @@ export function phoneCandidates(transcript: string): string[] {
     let number = run;
     if (number.length === 12 && number.startsWith('91'))
       number = number.slice(2);
-    if (/^[6-9]\d{9}$/.test(number)) found.add(number);
+    if (number.length >= 6 && number.length <= 20) found.add(number);
     run = '';
     repeat = 1;
   };
@@ -81,5 +81,17 @@ export function reliablePhone(transcript: string, modelPhone: string) {
   if (candidates.length === 1) return candidates[0];
   if (candidates.length > 1)
     return candidates.includes(modelPhone) ? modelPhone : '';
+  return modelPhone;
+}
+
+export function phoneCandidates(transcript: string): string[] {
+  return digitRuns(transcript).filter(number => /^[6-9]\d{9}$/.test(number));
+}
+// Review candidates retain missing/extra digits. Never truncate or pad a number.
+// Contiguous groups are kept separate, so dates/counts cannot be merged into a phone.
+export function reviewPhone(transcript: string, modelPhone: string) {
+  const candidates = digitRuns(transcript);
+  if (candidates.length === 1) return candidates[0];
+  if (candidates.length > 1) return candidates.includes(modelPhone) ? modelPhone : '';
   return modelPhone;
 }

@@ -42,7 +42,9 @@ export async function saveExtraction(
 ) {
   const patch = {
     name: parsed.name,
-    phone: parsed.phone,
+    // Invalid-length candidates stay in the review session and raw transcript.
+    // The database phone column accepts only valid Indian mobile numbers.
+    phone: /^[6-9]\d{9}$/.test(parsed.phone) ? parsed.phone : '',
     school_name: parsed.school_name,
     bullet_requirements: parsed.requirements_summary,
     objective: null,

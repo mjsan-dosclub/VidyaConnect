@@ -10,6 +10,7 @@ import { details } from '@/lib/validation';
 export default function Confirmation() {
   const { t } = useLanguage();
   const [lead, setLead] = useState<LeadSession | null>(null);
+  const [mobile, setMobile] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function Confirmation() {
       return;
     }
     setLead(p);
+    setMobile(p.phone ?? '');
   }, [router]);
   if (!lead)
     return <p className="center muted">{t('Loading your introduction…')}</p>;
@@ -68,7 +70,7 @@ export default function Confirmation() {
         <p>
           {t('Please confirm your mobile number:')}
           <br />
-          <strong>{lead.phone || t('Add your number below')}</strong>
+          <strong>{mobile || t('Add your number below')}</strong>
         </p>
       </section>
       {lead.manual_review && (
@@ -115,14 +117,28 @@ export default function Confirmation() {
               <span>+91</span>
               <input
                 name="phone"
-                defaultValue={lead.phone}
+                value={mobile}
+                onChange={e => setMobile(e.target.value.replace(/\D/g, '').slice(0, 20))}
+                aria-invalid={!/^[6-9]\d{9}$/.test(mobile)}
+                aria-describedby="mobile-review-hint"
                 type="tel"
                 inputMode="numeric"
                 pattern="[6-9][0-9]{9}"
                 required
-                maxLength={10}
+                maxLength={20}
               />
             </div>
+            <span id="mobile-review-hint" className="mobile-review-hint" role="status">
+              {mobile.length > 10
+                ? <>{mobile.length} {t('digits captured')} · {mobile.length - 10} {t('extra. Please remove the extra digits.')}</>
+                : mobile.length > 0 && mobile.length < 10
+                  ? <>{mobile.length} {t('digits captured')} · {10 - mobile.length} {t('missing. Please add the missing digits.')}</>
+                  : mobile.length === 10 && !/^[6-9]\d{9}$/.test(mobile)
+                    ? t('An Indian mobile number must start with 6, 7, 8 or 9.')
+                    : mobile.length === 10
+                      ? t('10 digits. Please check that this is your number.')
+                      : t('No number was captured. Please enter your mobile number.')}
+            </span>
           </label>
           <label>
             {t('Institution / organisation name')}
@@ -182,7 +198,7 @@ export default function Confirmation() {
             {error}
           </p>
         )}
-        <button disabled={busy} className="primary">
+        <button disabled={busy || !/^[6-9]\d{9}$/.test(mobile)} className="primary">
           {busy ? (
             <LoaderCircle className="spin" size={18} />
           ) : (

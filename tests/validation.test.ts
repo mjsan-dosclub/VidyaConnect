@@ -31,7 +31,7 @@ test('AI may omit unknown phone but cannot invent malformed schema', () => {
     requirements_summary: [],
   };
   assert.equal(extraction.safeParse(base).success, true);
-  assert.equal(extraction.safeParse({ ...base, phone: '1234' }).success, false);
+  assert.equal(extraction.safeParse({ ...base, phone: '99876543210' }).success, true);
 
 });
 test('survey accepts optional email and strips legacy appointment fields; feedback and consent are required', () => {
@@ -60,4 +60,11 @@ test('origin checks allow loopback hostname and block cross-site requests', () =
     'https://karyaai.example/path',
   ])
     assert.equal(sameOrigin(value, 'karyaai.example'), false);
+});
+
+test('Review schema accepts incomplete digits while final submission rejects them', () => {
+  for (const number of ['998765432', '99876543210']) {
+    assert.equal(extraction.safeParse({ name: 'Test', phone: number, school_name: null, requirements_summary: [] }).success, true);
+    assert.equal(phone.safeParse(number).success, false);
+  }
 });
