@@ -1,4 +1,5 @@
 import 'server-only';
+import { emailFailure } from './email-failure';
 import { APP_NAME } from './brand';
 import { Resend } from 'resend';
 import { db } from './server';
@@ -17,6 +18,7 @@ export async function sendPending(id?: string) {
   const { data, error } = await query;
   if (error) throw error;
   let sent = 0;
+  const failures: { id: string; reason: string }[] = [];
   for (const item of data ?? []) {
     const lead = item.leads as unknown as {
       name: string;
@@ -39,15 +41,19 @@ export async function sendPending(id?: string) {
         },
         { idempotencyKey: `karyaai-thanks-${item.lead_id}` },
       );
-      if (res.error) continue;
+      if (res.error) {
+        failures.push({ id: item.lead_id, reason: emailFailure(res.error) });
+        continue;
+      }
       const { error: markError } = await db().rpc('mark_email_sent', {
         p_id: item.lead_id,
       });
       if (markError) throw markError;
       sent++;
     } catch {
+      failures.push({ id: item.lead_id, reason: 'delivery_or_status_update_failed' });
       /* Durable outbox remains pending for retry. */
     }
   }
-  return { sent, queued: sent === 0 };
+  return { sent, queued: sent === 0, ...(failures.length ? { failures } : {}) };
 }

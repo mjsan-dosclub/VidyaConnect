@@ -1,6 +1,7 @@
 export const maxDuration = 60;
 export const runtime = 'nodejs';
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { sendPending } from '@/lib/email';
 export async function GET(req: NextRequest) {
   if (
@@ -8,8 +9,10 @@ export async function GET(req: NextRequest) {
     req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`
   )
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const id = req.nextUrl.searchParams.get('id');
+  if (id && !z.uuid().safeParse(id).success) return NextResponse.json({ error: 'Invalid record ID' }, { status: 400 });
   try {
-    return NextResponse.json(await sendPending());
+    return NextResponse.json(await sendPending(id ?? undefined));
   } catch {
     return NextResponse.json({ error: 'Email retry failed' }, { status: 503 });
   }
