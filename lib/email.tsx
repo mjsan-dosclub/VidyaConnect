@@ -29,7 +29,7 @@ export async function sendPending(id?: string) {
     try {
       const res = await new Resend(process.env.RESEND_API_KEY).emails.send(
         {
-          from: process.env.EMAIL_FROM.replace(/^[^<]+(?=<)/, `${APP_NAME} `),
+          from: process.env.EMAIL_FROM,
           to: lead.email,
           subject: `Thank you for your feedback on ${APP_NAME}`,
           react: (
