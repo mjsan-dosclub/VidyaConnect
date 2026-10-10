@@ -31,9 +31,9 @@ export function useLanguage() {
   return useContext(Context);
 }
 export function LanguageSelector() {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   return (
-    <nav className="language-picker" aria-label="Language / மொழி">
+    <nav className="language-picker" aria-label={t('Instructions language / வழிமுறைகளின் மொழி')} title={t('This changes the instructions only. You can always speak in Tamil, English, or both.')}>
       <button
         type="button"
         lang="en"

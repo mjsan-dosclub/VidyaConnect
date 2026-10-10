@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { PcmCapture, encodeWav, isIosDevice } from '../lib/pcm-capture';
-test('iPhone Chrome and Safari take PCM capture while Android retains recognition', () => {
+test('iPhone Chrome and Safari use PCM capture while Android uses encoded audio', () => {
   assert.equal(isIosDevice('iPhone CriOS', 'iPhone', 1), true);
   assert.equal(isIosDevice('iPhone Safari', 'iPhone', 1), true);
   assert.equal(isIosDevice('Macintosh', 'MacIntel', 5), true);

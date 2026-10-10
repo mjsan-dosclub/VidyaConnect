@@ -13,11 +13,10 @@ import {
   PenLine,
   Check,
   LoaderCircle,
-  AudioLines,
 } from 'lucide-react';
 import RecordingWave from './recording-wave';
 import { getSession, saveSession, post } from '@/lib/client';
-import { SpeechSession, type Recognition } from '@/lib/speech-session';
+import { transcriptionPayload } from '@/lib/transcription';
 export function ModeToggle({ manual = false }: { manual?: boolean }) {
   const { t } = useLanguage();
   return (
@@ -49,33 +48,20 @@ export default function Voice() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [phase, setPhase] = useState('');
-  const rec = useRef<SpeechSession | null>(null);
   const audio = useRef<AudioCapture | PcmCapture | null>(null);
   const audioGeneration = useRef(0);
   const audioPrefix = useRef('');
   const [savedAudio, setSavedAudio] = useState<Blob | null>(null);
-  const [audioMode, setAudioMode] = useState(false);
   const textRef = useRef('');
   useEffect(() => {
     const p = getSession();
     textRef.current = p.transcript ?? '';
     setText(textRef.current);
     return () => {
-      rec.current?.dispose();
       audio.current?.cancel();
       audioGeneration.current++;
     };
   }, []);
-  useEffect(() => {
-    rec.current?.dispose();
-    audio.current?.cancel();
-    audioGeneration.current++;
-    setSavedAudio(null);
-    setAudioMode(false);
-    setRecording(false);
-    setBusy(false);
-    setError('');
-  }, [language]);
   function change(v: string) {
     textRef.current = v;
     setText(v);
@@ -84,56 +70,18 @@ export default function Voice() {
   }
   function listen() {
     setError('');
-    if (recording) {
-      if (audioMode) void stopAudio();
-      else {
-        const current = rec.current;
-        setBusy(true);
-        setPhase(t('Finishing transcription…'));
-        void current?.stop().finally(() => {
-          if (rec.current === current) { setBusy(false); setPhase(''); }
-        });
-      }
-      return;
-    }
-    const win = window as unknown as {
-      SpeechRecognition?: new () => Recognition;
-      webkitSpeechRecognition?: new () => Recognition;
-    };
-    const API = win.SpeechRecognition ?? win.webkitSpeechRecognition;
-    if (
-      !API ||
-      isIosDevice(
-        navigator.userAgent,
-        navigator.platform,
-        navigator.maxTouchPoints,
-      )
-    ) {
-      void startAudio();
-      return;
-    }
-    setAudioMode(false);
-    const session = new SpeechSession({
-      create: () => new API(),
-      language: language === 'ta' ? 'ta-IN' : 'en-IN',
-      android: /Android/i.test(navigator.userAgent),
-      onText: change,
-      onListening: setRecording,
-      onError: (message) => setError(t(message)),
-    });
-    rec.current?.dispose();
-    rec.current = session;
-    session.start(textRef.current);
+    // Display language never selects a speech locale. Both languages use the same audio pipeline.
+    if (recording) void stopAudio();
+    else void startAudio();
   }
 
   async function startAudio() {
-    rec.current?.dispose();
     audio.current?.cancel();
     const generation = ++audioGeneration.current;
     setError('');
     setSavedAudio(null);
-    setAudioMode(true);
     setBusy(true);
+    setPhase(t('Opening microphone…'));
     audioPrefix.current = textRef.current;
     if (
       !navigator.mediaDevices?.getUserMedia ||
@@ -145,7 +93,6 @@ export default function Voice() {
         typeof MediaRecorder === 'undefined')
     ) {
       setBusy(false);
-      setAudioMode(false);
       setError(
         t(
           'Audio recording is unavailable. Please type below or use Manual Form.',
@@ -166,7 +113,7 @@ export default function Voice() {
     )
       ? new PcmCapture({ onError: onCaptureError })
       : new AudioCapture({
-          getStream: () => navigator.mediaDevices.getUserMedia({ audio: true }),
+          getStream: () => navigator.mediaDevices.getUserMedia({ audio: { channelCount: { ideal: 1 }, echoCancellation: true, noiseSuppression: true } }),
           create: (stream) => {
             const mime = audioMime((m) => MediaRecorder.isTypeSupported(m));
             return new MediaRecorder(stream, {
@@ -193,7 +140,7 @@ export default function Voice() {
           ),
         );
     } finally {
-      if (generation === audioGeneration.current) setBusy(false);
+      if (generation === audioGeneration.current) { setBusy(false); setPhase(''); }
     }
   }
   async function transcribeAudio(
@@ -204,11 +151,7 @@ export default function Voice() {
     setError('');
     setPhase(t('Transcribing your recording…'));
     try {
-      const result = await post('/api/transcribe', {
-        audio: await blobBase64(blob),
-        mime: blob.type.split(';')[0],
-        language,
-      });
+      const result = await post('/api/transcribe', transcriptionPayload(await blobBase64(blob), blob.type));
       if (generation !== audioGeneration.current) return;
       if (!result.transcript?.trim())
         throw new Error(
@@ -312,23 +255,10 @@ export default function Voice() {
           {busy
             ? phase || t('Opening microphone…')
             : recording
-              ? t(
-                  audioMode
-                    ? 'Recording. Tap Stop to see your words.'
-                    : 'Listening. Tap stop when you are done.',
-                )
-              : t('Tap the mic. Speak in English or Tamil.')}
+              ? t('Recording. Tap Stop to see your words.')
+              : t('Tap the mic. Mix Tamil and English freely.')}
         </strong>
       </section>
-      {!recording && !busy && (
-        <button
-          type="button"
-          className="audio-fallback"
-          onClick={() => void startAudio()}
-        >
-          {t('Use audio recording')}
-        </button>
-      )}
       {savedAudio && !busy && (
         <button
           type="button"
@@ -340,7 +270,7 @@ export default function Voice() {
       )}
       <section className="transcript-card glass">
         <div className="transcript-heading">
-          <label htmlFor="transcript">{t('Live transcript')}</label>
+          <label htmlFor="transcript">{t('Your transcript')}</label>
           <span>
             <PenLine size={12} />
             {t('Tap to edit')}

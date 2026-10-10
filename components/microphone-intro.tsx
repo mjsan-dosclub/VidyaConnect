@@ -36,7 +36,7 @@ export default function MicrophoneIntro() {
     <h2 id="mic-intro-title">{t('Before you share your feedback')}</h2>
     <p>{t('Allow microphone access to speak your suggestions about originBI. Tap Allow when your browser asks.')}</p>
     <p><ShieldCheck size={18} /> {t('Recording starts only when you tap the mic and ends when you tap Stop. The microphone is released after recording or when you leave this page.')}</p>
-    <p>{t('Your voice is converted into editable text. Some devices send temporary audio to our AI transcription service. We save your reviewed feedback and details, not the audio recording.')}</p>
+    <p>{t('Your recording is sent securely to our AI service to create editable text. We save your reviewed feedback and details, not the audio recording.')}</p>
     {error && <p className="error" role="alert">{error}</p>}
     <button className="primary" onClick={() => void enable()} disabled={busy}>{t(busy ? 'Opening microphone…' : 'Enable microphone')}</button>
     <button className="secondary" onClick={() => finish(true)} disabled={busy}>{t('Use the form instead')}</button>

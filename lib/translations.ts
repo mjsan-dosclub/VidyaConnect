@@ -1,5 +1,10 @@
 export type Language = 'en' | 'ta';
 export const tamil: Record<string, string> = {
+  'Your recording is sent securely to our AI service to create editable text. We save your reviewed feedback and details, not the audio recording.': 'உங்கள் குரல் பதிவு உரையாக மாற்றப்பட எங்கள் AI சேவைக்கு பாதுகாப்பாக அனுப்பப்படும். நீங்கள் சரிபார்த்த கருத்துகளையும் விவரங்களையும் மட்டுமே சேமிக்கிறோம்; குரல் பதிவைச் சேமிப்பதில்லை.',
+  'Your transcript': 'நீங்கள் பேசிய உரை',
+  'Tap the mic. Mix Tamil and English freely.': 'மைக் பொத்தானைத் தொட்டு தமிழ், ஆங்கிலம் கலந்து பேசலாம்.',
+  'Instructions language / வழிமுறைகளின் மொழி': 'வழிமுறைகளின் மொழி',
+  'This changes the instructions only. You can always speak in Tamil, English, or both.': 'இது வழிமுறைகளின் மொழியை மட்டுமே மாற்றும். எப்போதும் தமிழ், ஆங்கிலம் அல்லது இரண்டும் கலந்து பேசலாம்.',
   'Finishing transcription…': 'இறுதி வார்த்தைகள் உரையாக மாற்றப்படுகின்றன…',
   'digits captured': 'இலக்கங்கள் பதிவாகியுள்ளன',
   'extra. Please remove the extra digits.': 'இலக்கங்கள் கூடுதலாக உள்ளன. கூடுதல் இலக்கங்களை நீக்கவும்.',
