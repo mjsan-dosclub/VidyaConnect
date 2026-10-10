@@ -1,5 +1,6 @@
 export type Language = 'en' | 'ta';
 export const tamil: Record<string, string> = {
+  'Finishing transcription…': 'இறுதி வார்த்தைகள் உரையாக மாற்றப்படுகின்றன…',
   'digits captured': 'இலக்கங்கள் பதிவாகியுள்ளன',
   'extra. Please remove the extra digits.': 'இலக்கங்கள் கூடுதலாக உள்ளன. கூடுதல் இலக்கங்களை நீக்கவும்.',
   'missing. Please add the missing digits.': 'இலக்கங்கள் குறைவாக உள்ளன. விடுபட்ட இலக்கங்களைச் சேர்க்கவும்.',

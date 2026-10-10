@@ -156,3 +156,27 @@ test('Tamil recognition locale survives automatic restarts', async () => {
   assert.equal(instances[1].lang, 'ta-IN');
   session.dispose();
 });
+
+test('Stop waits for the closing name before allowing submission', async () => {
+  let recognition!: Recognition;
+  let transcript = '';
+  let stopped = false;
+  const session = new SpeechSession({
+    android: false,
+    create: () => recognition = {continuous:false,interimResults:false,lang:'',onresult:null,onerror:null,onend:null,start(){},stop(){},abort(){}},
+    onText: value => transcript = value,
+    onListening: () => {},
+    onError: () => assert.fail('unexpected error'),
+  });
+  session.start('');
+  recognition.onresult?.({results:[{isFinal:true,0:{transcript:'Please add reports.'}}]});
+  const pending = session.stop().then(() => stopped = true);
+  await Promise.resolve();
+  assert.equal(stopped, false);
+  recognition.onresult?.({results:[{isFinal:true,0:{transcript:'Please add reports. My name is Mohan Raj.'}}]});
+  recognition.onend?.();
+  await pending;
+  assert.equal(stopped, true);
+  assert.equal(transcript, 'Please add reports. My name is Mohan Raj.');
+  session.dispose();
+});

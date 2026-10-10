@@ -36,6 +36,7 @@ export class SpeechSession {
   private restart: ReturnType<typeof setTimeout> | undefined;
   private listening = false;
   private text = '';
+  private finishStop: (() => void) | null = null;
   constructor(
     private options: {
       create: () => Recognition;
@@ -89,7 +90,10 @@ export class SpeechSession {
           () => this.begin(),
           this.options.restartDelay ?? 300,
         );
-      } else this.options.onListening(false);
+      } else {
+        this.options.onListening(false);
+        this.finishStop?.();
+      }
     };
     try {
       recognition.start();
@@ -102,14 +106,26 @@ export class SpeechSession {
       );
     }
   }
-  stop() {
+  stop(): Promise<void> {
     this.listening = false;
     clearTimeout(this.restart);
     this.options.onListening(false);
-    // Allow the final result from stop() to arrive; onend must not restart.
-    this.recognition?.stop();
+    if (!this.recognition) return Promise.resolve();
+    // Browsers can deliver the final phrase after Stop. Keep Submit unavailable
+    // until onend so a closing name is included in the draft sent for extraction.
+    return new Promise(resolve => {
+      const finish = () => {
+        clearTimeout(timeout);
+        this.finishStop = null;
+        resolve();
+      };
+      const timeout = setTimeout(finish, 3000);
+      this.finishStop = finish;
+      try { this.recognition?.stop(); } catch { finish(); }
+    });
   }
   dispose() {
+    this.finishStop?.();
     this.listening = false;
     clearTimeout(this.restart);
     const recognition = this.recognition;
