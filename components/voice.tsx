@@ -15,7 +15,7 @@ import {
   LoaderCircle,
   AudioLines,
 } from 'lucide-react';
-import { motion, useReducedMotion } from 'framer-motion';
+import RecordingWave from './recording-wave';
 import { getSession, saveSession, post } from '@/lib/client';
 import { SpeechSession, type Recognition } from '@/lib/speech-session';
 export function ModeToggle({ manual = false }: { manual?: boolean }) {
@@ -56,7 +56,6 @@ export default function Voice() {
   const [savedAudio, setSavedAudio] = useState<Blob | null>(null);
   const [audioMode, setAudioMode] = useState(false);
   const textRef = useRef('');
-  const reduced = useReducedMotion();
   useEffect(() => {
     const p = getSession();
     textRef.current = p.transcript ?? '';
@@ -290,17 +289,7 @@ export default function Voice() {
         </ol>
       </section>
       <section className="record-zone">
-        <div className="waveform" aria-hidden="true">
-          {Array.from({ length: 29 }, (_, i) =>
-            recording && !reduced ? (
-              <motion.span key={'active-' + i} initial={false}
-                animate={{ height: [6, 12 + ((i * 13) % 30), 6] }}
-                transition={{ duration: 0.7 + (i % 4) * 0.15, repeat: Infinity, delay: i * 0.025 }} />
-            ) : (
-              <span key={'static-' + i} style={{ height: 4 + (Math.sin(i * 1.6) + 1) * 4 }} />
-            ),
-          )}
-        </div>
+        <RecordingWave recording={recording} />
         <div className={'mic-orbit ' + (recording ? 'listening' : '')}>
           <button
             className="mic-button"
