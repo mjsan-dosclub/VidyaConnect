@@ -1,6 +1,5 @@
 import 'server-only';
 import { emailFailure } from './email-failure';
-import { APP_NAME } from './brand';
 import { Resend } from 'resend';
 import { db } from './server';
 import ThankYou from '@/emails/thank-you';
@@ -31,7 +30,7 @@ export async function sendPending(id?: string) {
         {
           from: process.env.EMAIL_FROM,
           to: lead.email,
-          subject: `Thank you for your feedback on ${APP_NAME}`,
+          subject: 'Thank you for helping shape OriginBI',
           react: (
             <ThankYou
               name={lead.name}
